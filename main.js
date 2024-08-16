@@ -2,14 +2,17 @@ const input = document.getElementById('input');
 const searchBtn = document.getElementById('searchBtn');
 const unitBtn = document.getElementById('unitBtn');
 const locationName = document.getElementById('name');
+const locationTime = document.getElementById('time');
 const locationCondition = document.getElementById('condition');
 const locationTemp = document.getElementById('temp');
 const locationFeelsLike = document.getElementById('feelsLike');
 const locationDescription = document.getElementById('description');
 const locationUv = document.getElementById('uv');
 const img = document.querySelector('img');
+const loader = document.querySelector('.loaderContainer');
 
 async function getWeather(location) {
+  showLoader();
   try {
     const response = await fetch(
       `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${location}?key=3RUT7DGF8DMF3DT52R42KBN4J`,
@@ -19,17 +22,20 @@ async function getWeather(location) {
       const weatherData = await response.json();
       results = {
         condition: weatherData.currentConditions.conditions,
-        description: weatherData.description,
+        description: weatherData.days[0].description,
         feelslike: weatherData.currentConditions.feelslike,
         name: weatherData.resolvedAddress,
-        sunrise: weatherData.currentConditions.sunrise,
-        sunset: weatherData.currentConditions.sunset,
+        timezone: weatherData.timezone,
         temp: weatherData.currentConditions.temp,
         uv: weatherData.currentConditions.uvindex,
       };
+
       console.log(results);
-      getGif(results.condition);
+      console.log(weatherData);
+
+      await getGif(results.condition);
       updateInfo();
+      hideLoader();
     } else {
       if (response.status === 400) alert('Not a valid location');
     }
@@ -51,23 +57,25 @@ function validateForm() {
 
 function updateInfo() {
   locationName.textContent = results.name;
+  locationTime.textContent = getTime(results.timezone);
   locationCondition.textContent = results.condition;
   locationTemp.textContent = results.temp + '°';
 
   if (results.feelslike !== results.temp) {
-    locationFeelsLike.textContent = 'feels like ' + results.feelslike + '°';
+    locationFeelsLike.textContent = 'Feels like ' + results.feelslike + '°';
   } else {
-    locationFeelsLike.textContent = 'feels exactly like it says';
+    locationFeelsLike.textContent = 'Feels exactly like it says.';
   }
 
   locationDescription.textContent = results.description;
 
   if (results.uv < 3) {
-    locationUv.textContent = 'UV index is ' + results.uv + ', no need to bother with sunscreen';
+    locationUv.textContent =
+      'The UV index is ' + results.uv + '. No need to bother with sunscreen.';
   } else if (2 < results.uv && results.uv < 8) {
-    locationUv.textContent = 'UV index is ' + results.uv + ", sunscreen wouldn't hurt";
+    locationUv.textContent = 'The UV index is ' + results.uv + ". Sunscreen wouldn't hurt.";
   } else if (results.uv > 7) {
-    locationUv.textContent = 'UV index is ' + results.uv + ', lather it on THICK';
+    locationUv.textContent = 'The UV index is ' + results.uv + '. Better lather it on THICK.';
   }
 }
 
@@ -99,6 +107,11 @@ function toggleUnits() {
   }
 }
 
+function getTime(timezone) {
+  const date = new Date();
+  return date.toLocaleString('en-US', { timeZone: timezone, timeStyle: 'short' });
+}
+
 function convertToC(temp) {
   return ((temp - 32) * 5) / 9;
 }
@@ -107,6 +120,17 @@ function convertToF(temp) {
   return (temp * 9) / 5 + 32;
 }
 
+function showLoader() {
+  loader.classList.add('visible');
+}
+
+function hideLoader() {
+  loader.classList.remove('visible');
+}
+
+input.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') validateForm();
+});
 searchBtn.addEventListener('click', validateForm);
 unitBtn.addEventListener('click', toggleUnits);
 

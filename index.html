@@ -8,17 +8,21 @@
     <script src="main.js" defer></script>
   </head>
   <body>
-    <div>
-      <input type="text" id="input" />
-      <button id="searchBtn">search</button>
+    <div class="searchDiv">
+      <input type="text" id="input" placeholder="enter a location" />
+      <button id="searchBtn">SEARCH</button>
     </div>
     <div class="display">
+      <div class="loaderContainer">
+        <div id="loader"></div>
+      </div>
       <div id="name"></div>
+      <div id="time"></div>
+      <div id="temp"></div>
+      <div id="condition"></div>
       <div class="gif">
         <img src="" alt="" />
       </div>
-      <div id="condition"></div>
-      <div id="temp"></div>
       <div id="feelsLike"></div>
       <div id="description"></div>
       <div id="uv"></div>
